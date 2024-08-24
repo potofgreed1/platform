@@ -1,50 +1,35 @@
-// Import Firebase
-import firebase from 'firebase/app';
-import 'firebase/database';
-
-// Your Firebase configuration
-const firebaseConfig = {
-  // Replace with your actual Firebase config
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { initializeApp } from 'firebase/app';
+import firebaseConfig from '../../firebaseconfig.ts';
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
-// Get a reference to the database service
-const database = firebase.database();
+// Get Firestore instance
+const db = getFirestore(app);
 
-// Reference to the 'chat' node in the database
-const chatRef = database.ref('chat');
-
-// Generate a random user ID
-const userId = 'user_' + Math.random().toString(36).substr(2, 9);
-
-// Function to store a message
-function storeMessage(message) {
-  const timestamp = Date.now();
-  return chatRef.push().set({
-    message: message,
-    timestamp: timestamp,
-    userId: userId
-  });
+// Function to store a message in Firestore
+async function storeMessage(message: string, userId: string) {
+  try {
+    const docRef = await addDoc(collection(db, "messages"), {
+      message: message,
+      userId: userId,
+      timestamp: new Date()
+    });
+    console.log("Message stored with ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error storing message: ", error);
+    throw error;
+  }
 }
 
-// Store a message
-storeMessage("Hello, this is a test message!")
-  .then(() => {
-    console.log("Message stored successfully");
-    // Close the connection after storing the message
-    firebase.app().delete();
+// Example usage
+const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+storeMessage("Hello, this is a test message!", userId)
+  .then((messageId) => {
+    console.log("Message stored successfully with ID:", messageId);
   })
   .catch((error) => {
-    console.error("Error storing message:", error);
-    // Close the connection even if there's an error
-    firebase.app().delete();
+    console.error("Failed to store message:", error);
   });
