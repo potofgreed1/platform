@@ -13,10 +13,13 @@ import RecentPlays from './sections/RecentPlays/RecentPlays'
 import Toasts from './sections/Toasts'
 import { MainWrapper, TosInner, TosWrapper } from './styles'
 import { TOS_HTML } from './constants'
-import { initializeApp } from 'firebase/app';
+import firebase from 'firebase/compat/app'
+import 'firebase/compat/database'
 import firebaseConfig from '../../firebaseconfig.ts';
 
-const app = initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig)
+}
 const database = firebase.database()
 const chatRef = database.ref('chat')
 
