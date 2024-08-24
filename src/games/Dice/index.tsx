@@ -2,23 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BPS_PER_WHOLE } from 'gamba-core-v2';
 import { GambaUi, TokenValue, useCurrentPool, useSound, useWagerInput } from 'gamba-react-ui-v2';
 import { useGamba } from 'gamba-react-v2';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
-
 import Slider from './Slider';
 import { SOUND_LOSE, SOUND_PLAY, SOUND_TICK, SOUND_WIN } from './constants';
 import { Container, Result, RollUnder, Stats } from './styles';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/database';
 import firebaseConfig from '../../firebaseconfig';
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const chatRef = database.ref('chat');
 
 const DICE_SIDES = 100;
 
 interface Message {
-  id: string;
-  text: string;
+  message: string;
   timestamp: number;
   userId: string;
 }
@@ -72,18 +71,16 @@ export default function Dice() {
   const game = GambaUi.useGame();
 
   useEffect(() => {
-    const chatRef = collection(db, 'chat');
-    const q = query(chatRef, orderBy('timestamp', 'desc'), limit(50));
+    const handleNewMessage = (snapshot: firebase.database.DataSnapshot) => {
+      const messageData = snapshot.val();
+      setMessages(prevMessages => [...prevMessages, messageData]);
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const newMessages = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Message)).reverse();
-      setMessages(newMessages);
-    });
+    chatRef.on('child_added', handleNewMessage);
 
-    return () => unsubscribe();
+    return () => {
+      chatRef.off('child_added', handleNewMessage);
+    };
   }, []);
 
   useEffect(() => {
@@ -111,13 +108,12 @@ export default function Dice() {
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (newMessage.trim()) {
-      const chatRef = collection(db, 'chat');
-      await addDoc(chatRef, {
-        text: newMessage,
+      chatRef.push().set({
+        message: newMessage,
         timestamp: Date.now(),
-        userId
+        userId: userId
       });
       setNewMessage('');
     }
@@ -187,9 +183,9 @@ export default function Dice() {
             <div style={{ marginTop: '20px', border: '1px solid #ccc', borderRadius: '5px', padding: '10px' }}>
               <h3>Shared Chat</h3>
               <div ref={chatLogRef} style={{ height: '200px', overflowY: 'auto', marginBottom: '10px' }}>
-                {messages.map((msg) => (
-                  <div key={msg.id} style={{ marginBottom: '5px' }}>
-                    <strong>{msg.userId.slice(0, 6)}</strong>: {msg.text}
+                {messages.map((msg, index) => (
+                  <div key={index} style={{ marginBottom: '5px' }}>
+                    <strong>{msg.userId.slice(0, 6)}</strong>: {msg.message}
                   </div>
                 ))}
               </div>
