@@ -7,10 +7,38 @@ import { SOUND_LOSE, SOUND_PLAY, SOUND_TICK, SOUND_WIN } from './constants'
 import { Container, Result, RollUnder, Stats } from './styles'
 import { initializeApp } from 'firebase/app';
 import firebaseConfig from '../../firebaseconfig.ts';
+import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
+async function testFirebase() {
+  try {
+    // Test writing data
+    const docRef = await addDoc(collection(db, "test"), {
+      message: "Hello from Firebase!",
+      timestamp: new Date()
+    });
+    console.log("Document written with ID: ", docRef.id);
+
+    // Test reading data
+    const querySnapshot = await getDocs(collection(db, "test"));
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+    });
+
+    console.log("Firebase test completed successfully!");
+  } catch (error) {
+    console.error("Error testing Firebase: ", error);
+  }
+}
+
+// Your existing dice game code here...
+
+// Call the test function
+testFirebase();
 const DICE_SIDES = 100
 
 export const outcomes = (
