@@ -6,7 +6,7 @@ import Slider from './Slider'
 import { SOUND_LOSE, SOUND_PLAY, SOUND_TICK, SOUND_WIN } from './constants'
 import { Container, Result, RollUnder, Stats } from './styles'
 
-import firebaseConfig from './firebaseconfig.ts';
+import firebaseConfig from '../../firebaseconfig.ts';
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
