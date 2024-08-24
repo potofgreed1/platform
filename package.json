@@ -9,7 +9,6 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
-    "firebase": "^10.13.0",
     "@coral-xyz/anchor": "^0.27.0",
     "@preact/signals-react": "^2.0.0",
     "@ledgerhq/errors": "6.16.3",
