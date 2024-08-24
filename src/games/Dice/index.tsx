@@ -5,11 +5,11 @@ import React from 'react'
 import Slider from './Slider'
 import { SOUND_LOSE, SOUND_PLAY, SOUND_TICK, SOUND_WIN } from './constants'
 import { Container, Result, RollUnder, Stats } from './styles'
-import { initializeApp } from 'firebase'
+import { initializeApp } from 'firebase/app';
 import firebaseConfig from '../../firebaseconfig.ts';
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
 const DICE_SIDES = 100
 
