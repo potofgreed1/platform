@@ -15,7 +15,7 @@ import { MainWrapper, TosInner, TosWrapper } from './styles'
 import { TOS_HTML } from './constants'
 import firebase from 'firebase/compat/app'
 import 'firebase/compat/database'
-import firebaseConfig from '../../firebaseconfig.ts';
+import firebaseConfig from './firebaseconfig.ts';
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig)
