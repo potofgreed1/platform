@@ -1,44 +1,19 @@
+import React, { useState, useEffect, useRef } from 'react'
 import { BPS_PER_WHOLE } from 'gamba-core-v2'
 import { GambaUi, TokenValue, useCurrentPool, useSound, useWagerInput } from 'gamba-react-ui-v2'
 import { useGamba } from 'gamba-react-v2'
-import React from 'react'
 import Slider from './Slider'
 import { SOUND_LOSE, SOUND_PLAY, SOUND_TICK, SOUND_WIN } from './constants'
 import { Container, Result, RollUnder, Stats } from './styles'
-import { initializeApp } from 'firebase/app';
-import firebaseConfig from '../../firebaseconfig.ts';
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
-
+import { initializeApp } from 'firebase/app'
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit } from 'firebase/firestore'
+import firebaseConfig from '../../firebaseconfig'
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app = initializeApp(firebaseConfig)
+const db = getFirestore(app)
 
-async function testFirebase() {
-  try {
-    // Test writing data
-    const docRef = await addDoc(collection(db, "test"), {
-      message: "Hello from Firebase!",
-      timestamp: new Date()
-    });
-    console.log("Document written with ID: ", docRef.id);
 
-    // Test reading data
-    const querySnapshot = await getDocs(collection(db, "test"));
-    querySnapshot.forEach((doc) => {
-      console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
-    });
-
-    console.log("Firebase test completed successfully!");
-  } catch (error) {
-    console.error("Error testing Firebase: ", error);
-  }
-}
-
-// Your existing dice game code here...
-
-// Call the test function
-testFirebase();
 const DICE_SIDES = 100
 
 export const outcomes = (
@@ -52,6 +27,12 @@ export const outcomes = (
     })
   const totalValue = payoutArray.reduce((p, x) => p + x, 0)
   return payoutArray.map((x) => Number(BigInt(x * BPS_PER_WHOLE) / BigInt(totalValue || 1) * BigInt(length)) / BPS_PER_WHOLE)
+}
+interface Message {
+  id: string
+  text: string
+  timestamp: number
+  userId: string
 }
 
 export default function Dice() {
@@ -100,6 +81,42 @@ export default function Dice() {
       sounds.play('win')
     } else {
       sounds.play('lose')
+    }
+  }
+
+  // New chat-related state and logic
+  const [messages, setMessages] = useState<Message[]>([])
+  const [newMessage, setNewMessage] = useState('')
+  const [userId] = useState(`user_${Math.random().toString(36).substr(2, 9)}`)
+  const chatLogRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const q = query(collection(db, 'chat'), orderBy('timestamp', 'desc'), limit(50))
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const newMessages = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Message)).reverse()
+      setMessages(newMessages)
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (chatLogRef.current) {
+      chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight
+    }
+  }, [messages])
+
+  const sendMessage = async () => {
+    if (newMessage.trim()) {
+      await addDoc(collection(db, 'chat'), {
+        text: newMessage,
+        timestamp: Date.now(),
+        userId
+      })
+      setNewMessage('')
     }
   }
 
@@ -162,6 +179,28 @@ export default function Dice() {
                 }
               />
             </div>
+            
+            {/* Chat UI */}
+            <div style={{ marginTop: '20px', border: '1px solid #ccc', borderRadius: '5px', padding: '10px' }}>
+              <h3>Chat</h3>
+              <div ref={chatLogRef} style={{ height: '200px', overflowY: 'auto', marginBottom: '10px' }}>
+                {messages.map((msg) => (
+                  <div key={msg.id}>
+                    <strong>{msg.userId.slice(0, 6)}</strong>: {msg.text}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex' }}>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  style={{ flexGrow: 1, marginRight: '10px' }}
+                />
+                <button onClick={sendMessage}>Send</button>
+              </div>
+            </div>
           </Container>
         </GambaUi.Responsive>
       </GambaUi.Portal>
@@ -177,3 +216,4 @@ export default function Dice() {
     </>
   )
 }
+
