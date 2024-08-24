@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 dependencies:
+  'firebase':
+    specifier: ^10.13
+    version: 10.13
   '@coral-xyz/anchor':
     specifier: ^0.27.0
     version: 0.27.0
