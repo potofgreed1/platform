@@ -1,78 +1,50 @@
-import React, { useState, useEffect, useRef } from 'react';
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/database';
-import firebaseConfig from '../../firebaseconfig';
+// Import Firebase
+import firebase from 'firebase/app';
+import 'firebase/database';
+
+// Your Firebase configuration
+const firebaseConfig = {
+  // Replace with your actual Firebase config
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
 
 // Initialize Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+firebase.initializeApp(firebaseConfig);
+
+// Get a reference to the database service
 const database = firebase.database();
+
+// Reference to the 'chat' node in the database
 const chatRef = database.ref('chat');
 
-interface Message {
-  message: string;
-  timestamp: number;
-  userId: string;
+// Generate a random user ID
+const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+
+// Function to store a message
+function storeMessage(message) {
+  const timestamp = Date.now();
+  return chatRef.push().set({
+    message: message,
+    timestamp: timestamp,
+    userId: userId
+  });
 }
 
-export default function SharedChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [userId] = useState(`user_${Math.random().toString(36).substr(2, 9)}`);
-  const chatLogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleNewMessage = (snapshot: firebase.database.DataSnapshot) => {
-      const messageData = snapshot.val();
-      setMessages(prevMessages => [...prevMessages, messageData]);
-    };
-
-    chatRef.on('child_added', handleNewMessage);
-
-    return () => {
-      chatRef.off('child_added', handleNewMessage);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (chatLogRef.current) {
-      chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const sendMessage = () => {
-    if (newMessage.trim()) {
-      chatRef.push().set({
-        message: newMessage,
-        timestamp: Date.now(),
-        userId: userId
-      });
-      setNewMessage('');
-    }
-  };
-
-  return (
-    <div style={{ width: '300px', margin: '20px auto' }}>
-      <h2>Shared Chat</h2>
-      <div ref={chatLogRef} style={{ height: '400px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
-        {messages.map((msg, index) => (
-          <div key={index} style={{ marginBottom: '5px' }}>
-            <strong>{msg.userId.slice(0, 6)}</strong>: {msg.message}
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex' }}>
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-          style={{ flexGrow: 1, marginRight: '10px', padding: '5px' }}
-          placeholder="Type your message..."
-        />
-        <button onClick={sendMessage} style={{ padding: '5px 10px' }}>Send</button>
-      </div>
-    </div>
-  );
-}
+// Store a message
+storeMessage("Hello, this is a test message!")
+  .then(() => {
+    console.log("Message stored successfully");
+    // Close the connection after storing the message
+    firebase.app().delete();
+  })
+  .catch((error) => {
+    console.error("Error storing message:", error);
+    // Close the connection even if there's an error
+    firebase.app().delete();
+  });
