@@ -9,7 +9,7 @@ import { Container, Result, RollUnder, Stats } from './styles'
 import firebaseConfig from '../../firebaseconfig.ts';
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// firebase.initializeApp(firebaseConfig);
 
 const DICE_SIDES = 100
 
