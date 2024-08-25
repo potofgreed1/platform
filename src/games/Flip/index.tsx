@@ -9,10 +9,14 @@ import SOUND_COIN from './coin.mp3'
 import SOUND_LOSE from './lose.mp3'
 import SOUND_WIN from './win.mp3'
 
+import { ref, push, set, onChildAdded, serverTimestamp, query, limitToLast } from "firebase/database"
+import { db } from './firebaseconfig'
+
 const SIDES = {
   heads: [2, 0],
   tails: [0, 2],
 }
+
 const WAGER_OPTIONS = [1, 5, 10, 50, 100]
 
 type Side = keyof typeof SIDES
@@ -25,7 +29,6 @@ function Flip() {
   const [resultIndex, setResultIndex] = React.useState(0)
   const [side, setSide] = React.useState<Side>('heads')
   const [wager, setWager] = React.useState(WAGER_OPTIONS[0])
-
   const sounds = useSound({
     coin: SOUND_COIN,
     win: SOUND_WIN,
@@ -36,24 +39,28 @@ function Flip() {
     try {
       setWin(false)
       setFlipping(true)
-
       sounds.play('coin', { playbackRate: .5 })
-
       await game.play({
         bet: SIDES[side],
         wager,
         metadata: [side],
       })
-
       sounds.play('coin')
-
       const result = await game.result()
-
       const win = result.payout > 0
-
       setResultIndex(result.resultIndex)
-
       setWin(win)
+
+      // Store result in Firebase
+      const resultRef = ref(db, 'coinflips')
+      const newResultRef = push(resultRef)
+      await set(newResultRef, {
+        timestamp: serverTimestamp(),
+        side: side,
+        wager: wager,
+        win: win,
+        payout: result.payout
+      })
 
       if (win) {
         sounds.play('win')
@@ -81,7 +88,6 @@ function Flip() {
             <Coin result={resultIndex} flipping={flipping} />
           </React.Suspense>
           <Effect color="white" />
-
           {flipping && <Effect color="white" />}
           {win && <Effect color="#42ff78" />}
           <ambientLight intensity={3} />
