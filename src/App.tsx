@@ -17,6 +17,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { ref, push, set, onChildAdded, serverTimestamp } from "firebase/database"
 import styled from 'styled-components'
 import { db } from './firebaseconfig';
+import { Chatroom } from './chatroom'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
