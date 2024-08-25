@@ -9,7 +9,7 @@ import { GameSlider } from '../Dashboard/Dashboard'
 import { Container, Controls, IconButton, MetaControls, Screen, Splash } from './Game.styles'
 import { LoadingBar } from './LoadingBar'
 import { ProvablyFairModal } from './ProvablyFairModal'
-// import { TransactionModal } from './TransactionModal'
+import { Scoreboard } from './Scoreboard'
 
 function CustomError() {
   return (
@@ -24,11 +24,6 @@ function CustomError() {
   )
 }
 
-/**
- * A renderer component to display the contents of the loaded GambaUi.Game
- * Screen
- * Controls
- */
 function CustomRenderer() {
   const { game } = GambaUi.useGame()
   const [info, setInfo] = React.useState(false)
@@ -79,9 +74,6 @@ function CustomRenderer() {
       {provablyFair && (
         <ProvablyFairModal onClose={() => setProvablyFair(false)} />
       )}
-      {/* {txModal && (
-        <TransactionModal onClose={() => setTransactionModal(false)} />
-      )} */}
       <Container>
         <Screen>
           <Splash>
@@ -104,21 +96,13 @@ function CustomRenderer() {
         <LoadingBar />
         <Controls>
           <div style={{ display: 'flex', gap: '10px' }}>
-            {/* <div style={{ display: 'flex' }}>
-              <IconButton onClick={() => setTransactionModal(true)}>
-                {loading === -1 ? (
-                  <Icon.Shuffle />
-                ) : (
-                  <Spinner />
-                )}
-              </IconButton>
-            </div> */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <GambaUi.PortalTarget target="controls" />
               <GambaUi.PortalTarget target="play" />
             </div>
           </div>
         </Controls>
+        <Scoreboard />
       </Container>
     </>
   )
