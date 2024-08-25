@@ -56,6 +56,7 @@ function Flip() {
       const newResultRef = push(resultRef)
       await set(newResultRef, {
         timestamp: serverTimestamp(),
+        userAddress: gamba.wallet?.publicKey?.toString() || 'Unknown',
         side: side,
         wager: wager,
         win: win,
