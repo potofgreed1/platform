@@ -59,19 +59,17 @@ export default function App() {
   // Chat state
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
+  const messagesEndRef = useRef(null)
 
-  useEffect(() => {
-    if (publicKey) {
-      console.log("Wallet connected:", publicKey.toString())
-    } else {
-      console.log("Wallet not connected")
-    }
-  }, [publicKey])
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
   useEffect(() => {
     const chatRef = ref(db, 'chat')
+    const recentMessagesQuery = query(chatRef, limitToLast(50))
 
-    const unsubscribe = onChildAdded(chatRef, (snapshot) => {
+    const unsubscribe = onChildAdded(recentMessagesQuery, (snapshot) => {
       const messageData = snapshot.val()
       setMessages(prevMessages => [...prevMessages, messageData])
     })
@@ -79,13 +77,13 @@ export default function App() {
     return () => unsubscribe()
   }, [])
 
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Sending message:", newMessage)
-    if (!newMessage.trim()) {
-      console.log("Message is empty, not sending")
-      return
-    }
+    if (!newMessage.trim()) return
     if (!publicKey) {
       console.error("Wallet not connected")
       return
@@ -95,13 +93,11 @@ export default function App() {
     const newMessageRef = push(chatRef)
 
     try {
-      console.log("Attempting to send message to Firebase")
       await set(newMessageRef, {
         message: newMessage,
         timestamp: serverTimestamp(),
         userId: publicKey.toString()
       })
-      console.log("Message sent successfully")
       setNewMessage('')
     } catch (error) {
       console.error("Error sending message: ", error)
@@ -149,13 +145,15 @@ export default function App() {
                 <strong>{formatUserId(msg.userId)}:</strong> {msg.message}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
-          <form onSubmit={sendMessage}>
+          <form onSubmit={sendMessage} style={{ display: 'flex' }}>
             <input 
               type="text" 
               value={newMessage} 
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type a message"
+              style={{ flexGrow: 1, marginRight: '10px' }}
             />
             <button type="submit">Send</button>
           </form>
