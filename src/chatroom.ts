@@ -2,34 +2,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { ref, push, set, onChildAdded, serverTimestamp, query, limitToLast } from "firebase/database"
 import { db } from './firebaseconfig'
-import styled from 'styled-components'
 
 interface Message {
   message: string
   timestamp: number
   userId: string
 }
-
-const ChatContainer = styled.div`
-  margin-top: 20px;
-`
-
-const MessageList = styled.div`
-  height: 300px;
-  overflow-y: scroll;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-`
-
-const MessageForm = styled.form`
-  display: flex;
-`
-
-const MessageInput = styled.input`
-  flex-grow: 1;
-  margin-right: 10px;
-`
 
 export const Chatroom: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([])
@@ -86,24 +64,25 @@ export const Chatroom: React.FC = () => {
   }
 
   return (
-    <ChatContainer>
-      <MessageList>
+    <div style={{ marginTop: '20px' }}>
+      <div style={{ height: '300px', overflowY: 'scroll', border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
         {messages.map((msg, index) => (
           <div key={index}>
             <strong>{formatUserId(msg.userId)}:</strong> {msg.message}
           </div>
         ))}
         <div ref={messagesEndRef} />
-      </MessageList>
-      <MessageForm onSubmit={sendMessage}>
-        <MessageInput 
+      </div>
+      <form onSubmit={sendMessage} style={{ display: 'flex' }}>
+        <input 
           type="text" 
           value={newMessage} 
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message"
+          style={{ flexGrow: 1, marginRight: '10px' }}
         />
         <button type="submit">Send</button>
-      </MessageForm>
-    </ChatContainer>
+      </form>
+    </div>
   )
 }
