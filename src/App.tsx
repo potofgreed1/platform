@@ -14,8 +14,6 @@ import Toasts from './sections/Toasts'
 import { MainWrapper, TosInner, TosWrapper } from './styles'
 import { TOS_HTML } from './constants'
 import { Chatroom } from './chatroom'
-import { Scoreboard } from './Scoreboard'  // Import the Scoreboard component
-
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -53,7 +51,6 @@ function ErrorHandler() {
 export default function App() {
   const newcomer = useUserStore((state) => state.newcomer)
   const set = useUserStore((state) => state.set)
-
   return (
     <>
       {newcomer && (
@@ -81,12 +78,6 @@ export default function App() {
         </Routes>
         <h2 style={{ textAlign: 'center' }}>Recent Plays</h2>
         <RecentPlays />
-        
-        {/* Add the Scoreboard component here */}
-        <Scoreboard />
-        
-        {/* Chat UI */}
-        <Chatroom />
       </MainWrapper>
     </>
   )
