@@ -52,22 +52,29 @@ function Flip() {
       setWin(win)
 
       // Store result in Firebase
-      const resultRef = ref(db, 'coinflips')
-      const newResultRef = push(resultRef)
-      await set(newResultRef, {
-        timestamp: serverTimestamp(),
-        userAddress: gamba.wallet?.publicKey?.toString() || 'Unknown',
-        side: side,
-        wager: wager,
-        win: win,
-        payout: result.payout
-      })
+      const flipResultsRef = ref(db, 'flipResults')
+      const newFlipResultRef = push(flipResultsRef)
+      
+      try {
+        await set(newFlipResultRef, {
+          timestamp: serverTimestamp(),
+          userId: gamba.wallet?.publicKey?.toString() || 'Unknown',
+          side: side,
+          wager: wager,
+          win: win,
+          payout: result.payout
+        })
+      } catch (error) {
+        console.error("Error sending flip result: ", error)
+      }
 
       if (win) {
         sounds.play('win')
       } else {
         sounds.play('lose')
       }
+    } catch (error) {
+      console.error("Error during game play: ", error)
     } finally {
       setFlipping(false)
     }
