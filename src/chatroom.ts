@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { ref, push, set, onChildAdded, serverTimestamp, query, limitToLast } from "firebase/database"
 import { db } from './firebaseconfig'
+import './chatroom.css'  // Import the CSS file
 
 interface Message {
   message: string
@@ -64,24 +65,24 @@ export const Chatroom: React.FC = () => {
   }
 
   return (
-    <div style={{ marginTop: '20px' }}>
-      <div style={{ height: '300px', overflowY: 'scroll', border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+    <div className="chat-container">
+      <div className="message-list">
         {messages.map((msg, index) => (
-          <div key={index}>
+          <div key={index} className="message">
             <strong>{formatUserId(msg.userId)}:</strong> {msg.message}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={sendMessage} style={{ display: 'flex' }}>
+      <form onSubmit={sendMessage} className="message-form">
         <input 
           type="text" 
           value={newMessage} 
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message"
-          style={{ flexGrow: 1, marginRight: '10px' }}
+          className="message-input"
         />
-        <button type="submit">Send</button>
+        <button type="submit" className="send-button">Send</button>
       </form>
     </div>
   )
