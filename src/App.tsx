@@ -61,6 +61,14 @@ export default function App() {
   const [newMessage, setNewMessage] = useState('')
 
   useEffect(() => {
+    if (publicKey) {
+      console.log("Wallet connected:", publicKey.toString())
+    } else {
+      console.log("Wallet not connected")
+    }
+  }, [publicKey])
+
+  useEffect(() => {
     const chatRef = ref(db, 'chat')
 
     const unsubscribe = onChildAdded(chatRef, (snapshot) => {
@@ -71,9 +79,13 @@ export default function App() {
     return () => unsubscribe()
   }, [])
 
-  const sendMessage = async (e) => {
+  const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim()) return
+    console.log("Sending message:", newMessage)
+    if (!newMessage.trim()) {
+      console.log("Message is empty, not sending")
+      return
+    }
     if (!publicKey) {
       console.error("Wallet not connected")
       return
@@ -83,18 +95,20 @@ export default function App() {
     const newMessageRef = push(chatRef)
 
     try {
+      console.log("Attempting to send message to Firebase")
       await set(newMessageRef, {
         message: newMessage,
         timestamp: serverTimestamp(),
         userId: publicKey.toString()
       })
+      console.log("Message sent successfully")
       setNewMessage('')
     } catch (error) {
       console.error("Error sending message: ", error)
     }
   }
 
-  const formatUserId = (userId) => {
+  const formatUserId = (userId: string) => {
     if (!userId) return 'Unknown'
     return `${userId.slice(0, 4)}...${userId.slice(-4)}`
   }
