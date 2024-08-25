@@ -10,7 +10,7 @@ import SOUND_LOSE from './lose.mp3'
 import SOUND_WIN from './win.mp3'
 
 import { ref, push, set, onChildAdded, serverTimestamp, query, limitToLast } from "firebase/database"
-import { db } from './firebaseconfig'
+import { db } from '/../../firebaseconfig'
 
 const SIDES = {
   heads: [2, 0],
