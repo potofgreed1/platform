@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { ref, query, limitToLast, onChildAdded } from "firebase/database"
-import { db } from './firebaseConfig'
+import { db } from './firebaseconfig'
 
 interface CoinflipResult {
   timestamp: number
