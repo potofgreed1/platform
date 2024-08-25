@@ -4,6 +4,7 @@ import { db } from './firebaseconfig'
 
 interface CoinflipResult {
   timestamp: number
+  userAddress: string
   side: string
   wager: number
   win: boolean
@@ -31,9 +32,12 @@ export const Scoreboard: React.FC = () => {
       {results.length > 0 ? (
         <ul style={{ listStyleType: 'none', padding: 0 }}>
           {results.map((result, index) => (
-            <li key={index} style={{ marginBottom: '5px' }}>
-              {result.side} - Wager: {result.wager} - 
-              {result.win ? <span style={{ color: 'green' }}>Won {result.payout}</span> : <span style={{ color: 'red' }}>Lost</span>}
+            <li key={index} style={{ marginBottom: '10px' }}>
+              <div>User: {result.userAddress.slice(0, 6)}...{result.userAddress.slice(-4)}</div>
+              <div>
+                {result.side} - Wager: {result.wager} - 
+                {result.win ? <span style={{ color: 'green' }}>Won {result.payout}</span> : <span style={{ color: 'red' }}>Lost</span>}
+              </div>
             </li>
           ))}
         </ul>
