@@ -1,3 +1,6 @@
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+
 const firebaseConfig = {
   apiKey: "AIzaSyCrZw1nIwHHoglV-L1AcOrcXasDRrFg0A8",
   authDomain: "raceme-54047.firebaseapp.com",
@@ -11,3 +14,6 @@ const firebaseConfig = {
 
 
 export default firebaseConfig;
+
+const app = initializeApp(firebaseConfig);
+export const db = getDatabase(app);
