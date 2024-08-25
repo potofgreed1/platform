@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import path from 'path'
 
 const ENV_PREFIX = ['VITE_']
 
@@ -13,6 +14,7 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       crypto: 'crypto-browserify',
+      '@': path.resolve(__dirname, './src')  // Add this line
     },
   },
   plugins: [
