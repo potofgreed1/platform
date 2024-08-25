@@ -18,23 +18,6 @@ import { ref, push, set, onChildAdded, serverTimestamp } from "firebase/database
 import styled from 'styled-components'
 import { db } from './firebaseconfig';
 
-import { useWalletModal } from '@solana/wallet-adapter-react-ui'
-import { GambaUi } from 'gamba-react-ui-v2'
-import { useTransactionError } from 'gamba-react-v2'
-import React from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
-import { Modal } from './components/Modal'
-import { useToast } from './hooks/useToast'
-import { useUserStore } from './hooks/useUserStore'
-import Dashboard from './sections/Dashboard/Dashboard'
-import Game from './sections/Game/Game'
-import Header from './sections/Header'
-import RecentPlays from './sections/RecentPlays/RecentPlays'
-import Toasts from './sections/Toasts'
-import { MainWrapper, TosInner, TosWrapper } from './styles'
-import { TOS_HTML } from './constants'
-import { Chatroom } from './chatroom'
-
 function ScrollToTop() {
   const { pathname } = useLocation()
   React.useEffect(() => window.scrollTo(0, 0), [pathname])
@@ -92,6 +75,28 @@ export default function App() {
       <ErrorHandler />
       <Header />
       <Toasts />
+      <MainWrapper>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/:gameId" element={<Game />} />
+        </Routes>
+        <h2 style={{ textAlign: 'center' }}>Recent Plays</h2>
+        <RecentPlays />
+        
+        {/* Chat UI */}
+        <Chatroom />
+      </MainWrapper>
+    </>
+  )
+}
+
+export default function App() {
+  const newcomer = useUserStore((state) => state.newcomer)
+  const set = useUserStore((state) => state.set)
+
+  return (
+    <>
+      {/* ... rest of the JSX remains the same */}
       <MainWrapper>
         <Routes>
           <Route path="/" element={<Dashboard />} />
